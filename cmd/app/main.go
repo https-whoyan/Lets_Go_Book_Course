@@ -1,14 +1,14 @@
 package main
 
 import (
-	"flag"
-
 	"github.com/https_whoyan/Lets_Go_Book_Course/config"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	addr := flag.String("addr", ":4000", "http service address")
-	flag.Parse()
-	apl := config.NewApplication()
-	apl.Run(*addr)
+	apl, err := config.NewApplication()
+	if err != nil {
+		panic(err)
+	}
+	apl.Run()
 }
