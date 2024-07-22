@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/https_whoyan/Lets_Go_Book_Course/cmd/flag"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/endpoints"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
+	myTemplate "github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
 )
 
 type Application struct {
@@ -20,6 +20,7 @@ type Application struct {
 	errorLogger *log.Logger
 	mux         *http.ServeMux
 	Handler     *endpoints.Handler
+	templates   *myTemplate.TemplateCache
 	snippets    *models.SnippetModel
 }
 
@@ -42,6 +43,11 @@ func NewApplication() (*Application, error) {
 		return nil, err
 	}
 
+	templateCache, err := myTemplate.NewTemplateCache()
+	if err != nil {
+		return nil, err
+	}
+
 	apl := &Application{
 		netPort:     flagCfg.NetAddr,
 		infoLogger:  infoLogger,
@@ -49,6 +55,7 @@ func NewApplication() (*Application, error) {
 		mux:         mux,
 		Handler:     h,
 		snippets:    snippetModel,
+		templates:   templateCache,
 	}
 
 	mux.HandleFunc("/", apl.home)
@@ -117,25 +124,9 @@ func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/pages/base.tmpl",
-		"./ui/html/pages/nav.tmpl",
-		"./ui/html/pages/view.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.errorLogger.Print(err.Error())
-		app.serverError(w, err)
-		return
-	}
-
-	err = ts.ExecuteTemplate(w, "base", &templateData{Snippet: snippet})
-	if err != nil {
-		app.errorLogger.Print(err.Error())
-		app.serverError(w, err)
-		return
-	}
+	app.render(w, http.StatusOK, "view.tmpl", &templateData{
+		Snippet: snippet,
+	})
 }
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
@@ -150,24 +141,9 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/pages/base.tmpl",
-		"./ui/html/pages/nav.tmpl",
-		"./ui/html/pages/home.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := &templateData{Snippets: snippets}
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	app.render(w, http.StatusOK, "home.tmpl", &templateData{
+		Snippets: snippets,
+	})
 }
 
 // Errs
@@ -182,4 +158,21 @@ func (app *Application) notFound(w http.ResponseWriter) {
 func (app *Application) serverError(w http.ResponseWriter, err error) {
 	app.errorLogger.Println(err)
 	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+// Template
+func (app *Application) render(w http.ResponseWriter, status int, page string, data *templateData) {
+	ts, ok := (*app.templates)[page]
+	if !ok {
+		err := fmt.Errorf("the template %s does not exist", page)
+		app.serverError(w, err)
+		return
+	}
+	w.WriteHeader(status)
+	// Execute the template set and write the response body. Again, if there
+	// is any error we call the the serverError() helper.
+	err := ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
