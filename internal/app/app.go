@@ -15,13 +15,13 @@ import (
 )
 
 type Application struct {
-	netPort     string
-	infoLogger  *log.Logger
-	errorLogger *log.Logger
-	mux         *http.ServeMux
-	Handler     *endpoints.Handler
-	templates   *myTemplate.TemplateCache
-	snippets    *models.SnippetModel
+	netPort          string
+	infoLogger       *log.Logger
+	errorLogger      *log.Logger
+	handler          *http.Handler
+	endpointsHandler *endpoints.Handler
+	templates        *myTemplate.TemplateCache
+	snippets         *models.SnippetModel
 }
 
 func NewApplication() (*Application, error) {
@@ -31,10 +31,6 @@ func NewApplication() (*Application, error) {
 	}
 	infoLogger := log.New(os.Stdout, "INGO\t", log.LstdFlags|log.Lshortfile)
 	errLogger := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
-	mux := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	h := endpoints.NewHandler(infoLogger, errLogger)
 
@@ -49,18 +45,15 @@ func NewApplication() (*Application, error) {
 	}
 
 	apl := &Application{
-		netPort:     flagCfg.NetAddr,
-		infoLogger:  infoLogger,
-		errorLogger: errLogger,
-		mux:         mux,
-		Handler:     h,
-		snippets:    snippetModel,
-		templates:   templateCache,
+		netPort:          flagCfg.NetAddr,
+		infoLogger:       infoLogger,
+		errorLogger:      errLogger,
+		endpointsHandler: h,
+		snippets:         snippetModel,
+		templates:        templateCache,
 	}
-
-	mux.HandleFunc("/", apl.home)
-	mux.HandleFunc("/snippet/create", apl.snippetCreate)
-	mux.HandleFunc("/snippet/view", apl.snippetView)
+	routes := apl.routes()
+	apl.handler = &routes
 
 	return apl, nil
 }
@@ -73,7 +66,7 @@ type templateData struct {
 func (app *Application) Run() {
 	srv := http.Server{
 		Addr:    app.netPort,
-		Handler: app.mux,
+		Handler: *app.handler,
 	}
 
 	defer func() {
@@ -144,6 +137,19 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl", &templateData{
 		Snippets: snippets,
 	})
+}
+
+func (app *Application) routes() http.Handler {
+	mux := http.NewServeMux()
+
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+
+	return endpoints.SecureHeaders(mux)
 }
 
 // Errs
