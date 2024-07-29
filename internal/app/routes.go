@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/endpoints"
+	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
@@ -17,7 +17,12 @@ func (app *Application) routes() http.Handler {
 	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static/", fileServer))
 
 	router.HandlerFunc(http.MethodGet, "/", app.home)
-	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreateByAPI)
+
+	router.HandlerFunc(http.MethodGet, "/snippet/create", app.snippetCreatePage)
+
+	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreatePageSendForm)
+	router.HandlerFunc(http.MethodPost, "/snippet/create_api", app.snippetCreateByAPI)
+
 	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetView)
 
 	ch := alice.New(app.recoverPanic, app.logHandler, endpoints.SecureHeaders)
@@ -51,5 +56,11 @@ func (app *Application) render(w http.ResponseWriter, status int, page string, d
 	err := ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, err)
+	}
+}
+
+func (app *Application) newTemplateData(r *http.Request) *templateData {
+	return &templateData{
+		CurrentYear: time.Now().Year(),
 	}
 }

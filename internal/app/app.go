@@ -52,8 +52,9 @@ func NewApplication() (*Application, error) {
 }
 
 type templateData struct {
-	Snippet  *models.Snippet
-	Snippets []*models.Snippet
+	CurrentYear int
+	Snippet     *models.Snippet
+	Snippets    []*models.Snippet
 }
 
 func (app *Application) Run() {
