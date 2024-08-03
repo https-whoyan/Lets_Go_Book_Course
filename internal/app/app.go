@@ -51,12 +51,6 @@ func NewApplication() (*Application, error) {
 	return apl, nil
 }
 
-type templateData struct {
-	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-}
-
 func (app *Application) Run() {
 	srv := http.Server{
 		Addr:    app.netPort,

@@ -3,11 +3,10 @@ package app
 import (
 	"fmt"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/endpoints"
-	"net/http"
-	"time"
-
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
+	"net/http"
 )
 
 func (app *Application) routes() http.Handler {
@@ -45,7 +44,7 @@ func (app *Application) serverError(w http.ResponseWriter, err error) {
 }
 
 // Template
-func (app *Application) render(w http.ResponseWriter, status int, page string, data *templateData) {
+func (app *Application) render(w http.ResponseWriter, status int, page string, data *template.TemplateData) {
 	ts, ok := (*app.templates)[page]
 	if !ok {
 		err := fmt.Errorf("the template %s does not exist", page)
@@ -56,11 +55,5 @@ func (app *Application) render(w http.ResponseWriter, status int, page string, d
 	err := ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, err)
-	}
-}
-
-func (app *Application) newTemplateData(r *http.Request) *templateData {
-	return &templateData{
-		CurrentYear: time.Now().Year(),
 	}
 }
