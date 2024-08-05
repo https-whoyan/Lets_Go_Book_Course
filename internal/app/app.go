@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/go-playground/form"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,7 @@ type Application struct {
 	infoLogger  *log.Logger
 	errorLogger *log.Logger
 	handler     *http.Handler
+	formDecoder *form.Decoder
 	templates   *myTemplate.TemplateCache
 	snippets    *models.SnippetModel
 }
@@ -40,6 +42,7 @@ func NewApplication() (*Application, error) {
 
 	apl := &Application{
 		netPort:     flagCfg.NetAddr,
+		formDecoder: form.NewDecoder(),
 		infoLogger:  infoLogger,
 		errorLogger: errLogger,
 		snippets:    snippetModel,

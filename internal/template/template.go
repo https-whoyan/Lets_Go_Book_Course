@@ -2,6 +2,7 @@ package template
 
 import (
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/validator"
 	"net/http"
 	"time"
 )
@@ -25,8 +26,9 @@ func NewTemplateData(_ *http.Request) *TemplateData {
 }
 
 type SnippetCreateForm struct {
-	Title       string
-	Content     string
-	Expires     int
-	FieldErrors map[string]string
+	validator.Validator `form: "-"`
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             int    `form:"expires"`
+	FieldErrors         map[string]string
 }
