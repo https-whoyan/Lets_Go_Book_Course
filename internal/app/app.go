@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/go-playground/form"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +9,9 @@ import (
 	"github.com/https_whoyan/Lets_Go_Book_Course/cmd/flag"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
 	myTemplate "github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/go-playground/form"
 )
 
 type Application struct {
@@ -20,6 +22,8 @@ type Application struct {
 	formDecoder *form.Decoder
 	templates   *myTemplate.TemplateCache
 	snippets    *models.SnippetModel
+
+	sessionManager *scs.SessionManager
 }
 
 func NewApplication() (*Application, error) {
@@ -43,11 +47,14 @@ func NewApplication() (*Application, error) {
 	apl := &Application{
 		netPort:     flagCfg.NetAddr,
 		formDecoder: form.NewDecoder(),
+
 		infoLogger:  infoLogger,
 		errorLogger: errLogger,
-		snippets:    snippetModel,
-		templates:   templateCache,
+
+		snippets:  snippetModel,
+		templates: templateCache,
 	}
+	apl.standSessionManager(flagCfg)
 	routes := apl.routes()
 	apl.handler = &routes
 

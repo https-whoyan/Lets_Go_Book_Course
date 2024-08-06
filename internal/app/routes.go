@@ -15,14 +15,20 @@ func (app *Application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static/", fileServer))
 
-	router.HandlerFunc(http.MethodGet, "/", app.home)
+	withSessions := alice.New(app.sessionManager.LoadAndSave)
 
-	router.HandlerFunc(http.MethodGet, "/snippet/create", app.snippetCreatePage)
+	configureRouter := func(method string, route string, handler http.HandlerFunc) {
+		router.Handler(method, route, withSessions.ThenFunc(handler))
+	}
 
-	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreatePageSendForm)
-	router.HandlerFunc(http.MethodPost, "/snippet/create_api", app.snippetCreateByAPI)
+	configureRouter(http.MethodGet, "/", app.home)
 
-	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetView)
+	configureRouter(http.MethodGet, "/snippet/create", app.snippetCreatePage)
+
+	configureRouter(http.MethodPost, "/snippet/create", app.snippetCreatePageSendForm)
+	configureRouter(http.MethodPost, "/snippet/create_api", app.snippetCreateByAPI)
+
+	configureRouter(http.MethodGet, "/snippet/view/:id", app.snippetView)
 
 	ch := alice.New(app.recoverPanic, app.logHandler, endpoints.SecureHeaders)
 

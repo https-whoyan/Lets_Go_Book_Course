@@ -38,6 +38,7 @@ func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http
 		app.serverError(w, err)
 		return
 	}
+
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
 
