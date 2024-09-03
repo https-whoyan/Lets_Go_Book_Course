@@ -3,7 +3,9 @@ package app
 import (
 	"errors"
 	"github.com/go-playground/form"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
 	"net/http"
+	"time"
 )
 
 func (app *Application) decodePostForm(r *http.Request, dst any) error {
@@ -20,4 +22,11 @@ func (app *Application) decodePostForm(r *http.Request, dst any) error {
 		return err
 	}
 	return nil
+}
+
+func (app *Application) newTemplateData(r *http.Request) *template.TemplateData {
+	return &template.TemplateData{
+		CurrentYear: time.Now().Year(),
+		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
+	}
 }

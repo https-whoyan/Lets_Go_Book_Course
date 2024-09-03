@@ -38,7 +38,7 @@ func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http
 		app.serverError(w, err)
 		return
 	}
-
+	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
 
@@ -64,6 +64,7 @@ func (app *Application) snippetCreateByAPI(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
+	app.infoLogger.Printf("Succesfully redirected")
 	params := httprouter.ParamsFromContext(r.Context())
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
@@ -80,10 +81,9 @@ func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	app.render(w, http.StatusOK, "view.tmpl", &template.TemplateData{
-		Snippet: snippet,
-	})
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
+	app.render(w, http.StatusOK, "view.tmpl", data)
 }
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {

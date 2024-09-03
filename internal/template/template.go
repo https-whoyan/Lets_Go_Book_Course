@@ -11,6 +11,7 @@ type TemplateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+	Flash       string
 	Form        any
 }
 
@@ -26,7 +27,7 @@ func NewTemplateData(_ *http.Request) *TemplateData {
 }
 
 type SnippetCreateForm struct {
-	validator.Validator `form: "-"`
+	validator.Validator `form:"-"`
 	Title               string `form:"title"`
 	Content             string `form:"content"`
 	Expires             int    `form:"expires"`

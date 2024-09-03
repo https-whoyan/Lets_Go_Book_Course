@@ -9,8 +9,8 @@ import (
 )
 
 func (app *Application) standSessionManager(flagCfg *flag.FlagConfig) {
-	network := flagCfg.RedisNetwork
-	address := flagCfg.RedisAddr
+	const network = "tcp"
+	address := flagCfg.RedisNetwork + ":" + flagCfg.RedisAddr
 	pool := &redis.Pool{
 		MaxIdle: 3,
 		Dial: func() (redis.Conn, error) {
@@ -22,4 +22,5 @@ func (app *Application) standSessionManager(flagCfg *flag.FlagConfig) {
 	sessionManager.Store = redisstore.New(pool)
 
 	app.sessionManager = sessionManager
+	app.infoLogger.Printf("ok")
 }
