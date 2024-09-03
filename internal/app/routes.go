@@ -30,6 +30,16 @@ func (app *Application) routes() http.Handler {
 
 	configureRouter(http.MethodGet, "/snippet/view/:id", app.snippetView)
 
+	// Auth
+
+	configureRouter(http.MethodGet, "/auth/signup", app.userSignupGet)
+	configureRouter(http.MethodPost, "/auth/signup", app.userSignupPost)
+
+	configureRouter(http.MethodGet, "/auth/login", app.userLoginGet)
+	configureRouter(http.MethodPost, "/auth/login", app.userLoginPost)
+
+	configureRouter(http.MethodPost, "/auth/logout", app.userLogoutPost)
+
 	ch := alice.New(app.recoverPanic, app.logHandler, endpoints.SecureHeaders)
 
 	return ch.Then(router)

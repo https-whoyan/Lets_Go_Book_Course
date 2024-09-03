@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/validator"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
@@ -38,7 +38,7 @@ func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http
 		app.serverError(w, err)
 		return
 	}
-	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created")
+	app.sessionManager.Put(r.Context(), flashKey, "Snippet successfully created")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
 
@@ -64,7 +64,6 @@ func (app *Application) snippetCreateByAPI(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
-	app.infoLogger.Printf("Succesfully redirected")
 	params := httprouter.ParamsFromContext(r.Context())
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
@@ -101,4 +100,26 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl", &template.TemplateData{
 		Snippets: snippets,
 	})
+}
+
+// Auth
+
+func (app *Application) userSignupGet(w http.ResponseWriter, r *http.Request) {
+	//...
+}
+
+func (app *Application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *Application) userLoginGet(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *Application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *Application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+
 }

@@ -27,6 +27,6 @@ func (app *Application) decodePostForm(r *http.Request, dst any) error {
 func (app *Application) newTemplateData(r *http.Request) *template.TemplateData {
 	return &template.TemplateData{
 		CurrentYear: time.Now().Year(),
-		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
+		Flash:       app.sessionManager.PopString(r.Context(), flashKey),
 	}
 }

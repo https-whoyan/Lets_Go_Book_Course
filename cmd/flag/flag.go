@@ -2,8 +2,9 @@ package flag
 
 import (
 	"flag"
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type FlagConfig struct {

@@ -68,7 +68,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	var snippets []*Snippet
 
-	rows, err := m.db.Query(multipleSelect)
+	rows, err := m.db.Query(multipleSelectSnippet)
 	if err != nil {
 		return []*Snippet{}, err
 	}

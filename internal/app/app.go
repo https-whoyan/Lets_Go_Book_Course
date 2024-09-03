@@ -2,13 +2,13 @@ package app
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"os"
-
 	"github.com/https_whoyan/Lets_Go_Book_Course/cmd/flag"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
 	myTemplate "github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
+	"log"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form"
@@ -65,6 +65,10 @@ func (app *Application) Run() {
 	srv := http.Server{
 		Addr:    app.netPort,
 		Handler: *app.handler,
+
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	defer func() {

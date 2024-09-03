@@ -2,7 +2,7 @@ package template
 
 import (
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/validator"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
 	"net/http"
 	"time"
 )
