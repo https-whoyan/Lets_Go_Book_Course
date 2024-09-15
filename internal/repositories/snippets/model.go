@@ -1,42 +1,25 @@
-package models
+package snippets
 
 import (
 	"database/sql"
 	"errors"
-	"fmt"
-	"github.com/https_whoyan/Lets_Go_Book_Course/pkg/repository/postgres"
-	"time"
-)
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
 
-type Snippet struct {
-	ID        int
-	Title     string
-	Content   string
-	CreatedAt time.Time
-	ExpiresAt time.Time
-}
-
-var (
-	ErrNoRecords = fmt.Errorf("models: no matching record found")
+	myErrors "github.com/https_whoyan/Lets_Go_Book_Course/internal/errors"
 )
 
 type SnippetModel struct {
 	db *sql.DB
 }
 
-func NewSnippetModel(serverAddr string) (*SnippetModel, error) {
-	db, err := postgres.Open(serverAddr)
-	if err != nil {
-		return nil, nil
-	}
-	err = db.Ping()
+func NewSnippetModel(db *sql.DB) (*SnippetModel, error) {
+	err := db.Ping()
 	if err != nil {
 		return nil, err
 	}
 	return &SnippetModel{db: db}, nil
 }
 
-// Insert TODO
 func (m *SnippetModel) Insert(title string, content string, expiresAt int) (int, error) {
 	var id int
 	row := m.db.QueryRow(insertSnippetStatement, title, content, expiresAt)
@@ -50,14 +33,14 @@ func (m *SnippetModel) Insert(title string, content string, expiresAt int) (int,
 	return id, nil
 }
 
-func (m *SnippetModel) Get(id int) (*Snippet, error) {
-	s := &Snippet{}
+func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
+	s := &models.Snippet{}
 
 	err := m.db.QueryRow(selectSnippetStatement, id).
 		Scan(&s.ID, &s.Title, &s.Content, &s.CreatedAt, &s.ExpiresAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNoRecords
+			return nil, myErrors.ErrNoRecords
 		}
 		return nil, err
 	}
@@ -65,27 +48,27 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 	return s, nil
 }
 
-func (m *SnippetModel) Latest() ([]*Snippet, error) {
-	var snippets []*Snippet
+func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
+	var snippets []*models.Snippet
 
 	rows, err := m.db.Query(multipleSelectSnippet)
 	if err != nil {
-		return []*Snippet{}, err
+		return []*models.Snippet{}, err
 	}
 	defer func() {
 		err = rows.Close()
 	}()
 
 	for rows.Next() {
-		s := &Snippet{}
+		s := &models.Snippet{}
 		internalErr := rows.Scan(&s.ID, &s.Title, &s.Content, &s.CreatedAt, &s.ExpiresAt)
 		if internalErr != nil {
-			return []*Snippet{}, internalErr
+			return []*models.Snippet{}, internalErr
 		}
 		snippets = append(snippets, s)
 	}
 	if err = rows.Err(); err != nil {
-		return []*Snippet{}, err
+		return []*models.Snippet{}, err
 	}
 	return snippets, nil
 }

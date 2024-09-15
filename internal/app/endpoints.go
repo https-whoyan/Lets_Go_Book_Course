@@ -3,21 +3,24 @@ package app
 import (
 	"errors"
 	"fmt"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
+
+	myErrors "github.com/https_whoyan/Lets_Go_Book_Course/internal/errors"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func (app *Application) snippetCreatePage(w http.ResponseWriter, r *http.Request) {
-	data := template.NewTemplateData(r)
+	data := app.newTemplateData(r)
+	data.Form = template.SnippetCreateForm{Expires: 365}
 	app.render(w, http.StatusOK, "create.tmpl", data)
 }
 
 func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http.Request) {
-	var form template.SnippetCreateForm
+	form := template.SnippetCreateForm{}
 	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -73,7 +76,7 @@ func (app *Application) snippetView(w http.ResponseWriter, r *http.Request) {
 
 	snippet, err := app.snippets.Get(id)
 	if err != nil {
-		if errors.Is(err, models.ErrNoRecords) {
+		if errors.Is(err, myErrors.ErrNoRecords) {
 			app.notFound(w)
 		} else {
 			app.serverError(w, err)
@@ -106,6 +109,9 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) userSignupGet(w http.ResponseWriter, r *http.Request) {
 	//...
+	data := app.newTemplateData(r)
+	data.Form = template.UserSignupForm{}
+	app.render(w, http.StatusOK, "signup.tmpl", data)
 }
 
 func (app *Application) userSignupPost(w http.ResponseWriter, r *http.Request) {

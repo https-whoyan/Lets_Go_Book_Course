@@ -2,9 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/https_whoyan/Lets_Go_Book_Course/cmd/flag"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
-	myTemplate "github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
+	"github.com/https_whoyan/Lets_Go_Book_Course/pkg/postgres"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +10,10 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form"
+	"github.com/https_whoyan/Lets_Go_Book_Course/cmd/flag"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/repositories/snippets"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/repositories/users"
+	myTemplate "github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
 )
 
 type Application struct {
@@ -21,7 +23,9 @@ type Application struct {
 	handler     *http.Handler
 	formDecoder *form.Decoder
 	templates   *myTemplate.TemplateCache
-	snippets    *models.SnippetModel
+
+	snippets *snippets.SnippetModel
+	users    *users.UsersModel
 
 	sessionManager *scs.SessionManager
 }
@@ -34,7 +38,17 @@ func NewApplication() (*Application, error) {
 	infoLogger := log.New(os.Stdout, "INGO\t", log.LstdFlags|log.Lshortfile)
 	errLogger := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	snippetModel, err := models.NewSnippetModel(flagCfg.DbAddr)
+	db, err := postgres.Open(flagCfg.DbAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	snippetModel, err := snippets.NewSnippetModel(db)
+	if err != nil {
+		return nil, err
+	}
+
+	usersModels, err := users.NewUsersModel(db)
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +64,10 @@ func NewApplication() (*Application, error) {
 
 		infoLogger:  infoLogger,
 		errorLogger: errLogger,
+		templates:   templateCache,
 
-		snippets:  snippetModel,
-		templates: templateCache,
+		snippets: snippetModel,
+		users:    usersModels,
 	}
 	apl.standSessionManager(flagCfg)
 	routes := apl.routes()

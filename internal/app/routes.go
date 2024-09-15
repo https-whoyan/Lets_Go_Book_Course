@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/endpoints"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/middleware"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
@@ -40,7 +40,7 @@ func (app *Application) routes() http.Handler {
 
 	configureRouter(http.MethodPost, "/auth/logout", app.userLogoutPost)
 
-	ch := alice.New(app.recoverPanic, app.logHandler, endpoints.SecureHeaders)
+	ch := alice.New(app.recoverPanic, app.logHandler, middleware.SecureHeaders)
 
 	return ch.Then(router)
 }

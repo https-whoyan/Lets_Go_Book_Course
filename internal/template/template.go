@@ -1,10 +1,11 @@
 package template
 
 import (
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
-	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
 	"net/http"
 	"time"
+
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
+	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
 )
 
 type TemplateData struct {
@@ -31,5 +32,11 @@ type SnippetCreateForm struct {
 	Title               string `form:"title"`
 	Content             string `form:"content"`
 	Expires             int    `form:"expires"`
-	FieldErrors         map[string]string
+}
+
+type UserSignupForm struct {
+	validator.Validator `form:"-"`
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
 }
