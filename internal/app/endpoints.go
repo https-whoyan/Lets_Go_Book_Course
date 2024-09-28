@@ -28,7 +28,7 @@ func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http
 	}
 	form.CheckField(validator.NonBlank(form.Title), "title", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Content, 100), "content", "This field cannot be blank")
-	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365),
+	form.CheckField(validator.Permitted(form.Expires, 1, 7, 365),
 		"expires", "This field cannot be blank")
 	if !form.Valid() {
 		data := app.newTemplateData(r)

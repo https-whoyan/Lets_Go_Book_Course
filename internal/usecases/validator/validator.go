@@ -42,7 +42,7 @@ func MaxChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) <= n
 }
 
-func PermittedInt(value int, permittedValues ...int) bool {
+func Permitted[T comparable](value T, permittedValues ...T) bool {
 	for _, permittedVal := range permittedValues {
 		if value == permittedVal {
 			return true

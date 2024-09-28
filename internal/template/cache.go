@@ -2,7 +2,10 @@ package template
 
 import (
 	"html/template"
+	"io/fs"
 	"path/filepath"
+
+	"github.com/https_whoyan/Lets_Go_Book_Course/ui"
 )
 
 type TemplateCache map[string]*template.Template
@@ -10,23 +13,22 @@ type TemplateCache map[string]*template.Template
 func NewTemplateCache() (*TemplateCache, error) {
 	cache := make(TemplateCache)
 
-	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl")
 	if err != nil {
 		return nil, err
 	}
 	for _, page := range pages {
 		name := filepath.Base(page)
-		files := []string{
-			"./ui/html/pages/base.tmpl",
-			"./ui/html/pages/nav.tmpl",
+		patterns := []string{
+			"html/pages/base.tmpl",
+			"html/pages/nav.tmpl",
 			page,
 		}
 
-		ts, err := template.ParseFiles(files...)
-		if err != nil {
+		ts, internalErr := template.New(name).ParseFS(ui.Files, patterns...)
+		if internalErr != nil {
 			return nil, err
 		}
-
 		cache[name] = ts
 	}
 

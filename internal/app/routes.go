@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/middleware"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
+	"github.com/https_whoyan/Lets_Go_Book_Course/ui"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 	"net/http"
@@ -12,8 +13,8 @@ import (
 func (app *Application) routes() http.Handler {
 	router := httprouter.New()
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static/", fileServer))
+	fileServer := http.FileServer(http.FS(ui.Files))
+	router.Handler(http.MethodGet, "/static/*filepath", fileServer)
 
 	withSessions := alice.New(app.sessionManager.LoadAndSave, middleware.NoSurf, app.authenticate)
 
