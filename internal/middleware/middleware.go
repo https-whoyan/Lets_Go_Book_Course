@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/justinas/nosurf"
 	"log"
 	"net/http"
 )
@@ -30,6 +31,16 @@ func SecureHeaders(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func NoSurf(next http.Handler) http.Handler {
+	csrfHandler := nosurf.New(next)
+	csrfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   true,
+	})
+	return csrfHandler
 }
 
 func LogHandler(next http.Handler, log *log.Logger) http.Handler {

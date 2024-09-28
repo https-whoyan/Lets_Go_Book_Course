@@ -12,6 +12,7 @@ type TemplateData struct {
 	IsAuthenticated bool
 	Flash           string
 	Form            any
+	CSRFToken       string
 }
 
 type SnippetCreateForm struct {

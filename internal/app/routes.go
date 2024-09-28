@@ -15,7 +15,7 @@ func (app *Application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static/", fileServer))
 
-	withSessions := alice.New(app.sessionManager.LoadAndSave)
+	withSessions := alice.New(app.sessionManager.LoadAndSave, middleware.NoSurf)
 
 	configureRouter := func(method string, route string, handler http.HandlerFunc) {
 		router.Handler(method, route, withSessions.ThenFunc(handler))

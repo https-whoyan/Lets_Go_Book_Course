@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-playground/form"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/template"
+	"github.com/justinas/nosurf"
 	"net/http"
 	"time"
 )
@@ -33,5 +34,6 @@ func (app *Application) newTemplateData(r *http.Request) *template.TemplateData 
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.sessionManager.PopString(r.Context(), flashKey),
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }
