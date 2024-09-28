@@ -26,7 +26,11 @@ func (app *Application) decodePostForm(r *http.Request, dst any) error {
 }
 
 func (app *Application) isAuthenticated(r *http.Request) bool {
-	return app.sessionManager.Exists(r.Context(), authKey)
+	isAuthenticated, ok := r.Context().Value(authKey).(bool)
+	if !ok {
+		return false
+	}
+	return isAuthenticated
 }
 
 func (app *Application) newTemplateData(r *http.Request) *template.TemplateData {
