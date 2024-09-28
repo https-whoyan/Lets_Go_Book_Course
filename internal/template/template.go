@@ -1,30 +1,17 @@
 package template
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/models"
 	"github.com/https_whoyan/Lets_Go_Book_Course/internal/usecases/validator"
 )
 
 type TemplateData struct {
-	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	Flash       string
-	Form        any
-}
-
-func NewTemplateData(_ *http.Request) *TemplateData {
-	return &TemplateData{
-		CurrentYear: time.Now().Year(),
-		Snippet:     nil,
-		Snippets:    nil,
-		Form: SnippetCreateForm{
-			Expires: 365,
-		},
-	}
+	CurrentYear     int
+	Snippet         *models.Snippet
+	Snippets        []*models.Snippet
+	IsAuthenticated bool
+	Flash           string
+	Form            any
 }
 
 type SnippetCreateForm struct {

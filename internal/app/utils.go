@@ -24,9 +24,14 @@ func (app *Application) decodePostForm(r *http.Request, dst any) error {
 	return nil
 }
 
+func (app *Application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), authKey)
+}
+
 func (app *Application) newTemplateData(r *http.Request) *template.TemplateData {
 	return &template.TemplateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       app.sessionManager.PopString(r.Context(), flashKey),
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.sessionManager.PopString(r.Context(), flashKey),
+		IsAuthenticated: app.isAuthenticated(r),
 	}
 }

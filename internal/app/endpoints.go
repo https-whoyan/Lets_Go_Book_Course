@@ -31,7 +31,7 @@ func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http
 	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365),
 		"expires", "This field cannot be blank")
 	if !form.Valid() {
-		data := template.NewTemplateData(r)
+		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, http.StatusUnprocessableEntity, "create.tmpl", data)
 		return
@@ -127,7 +127,7 @@ func (app *Application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.MinChars(form.Password, 5), "password", "Small len of password")
 
 	if !form.Valid() {
-		data := template.NewTemplateData(r)
+		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
 		return
@@ -168,7 +168,7 @@ func (app *Application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.NonBlank(form.Password), "password", "not empty")
 
 	if !form.Valid() {
-		data := template.NewTemplateData(r)
+		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", data)
 		return

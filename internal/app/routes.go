@@ -22,12 +22,6 @@ func (app *Application) routes() http.Handler {
 	}
 
 	configureRouter(http.MethodGet, "/", app.home)
-
-	configureRouter(http.MethodGet, "/snippet/create", app.snippetCreatePage)
-
-	configureRouter(http.MethodPost, "/snippet/create", app.snippetCreatePageSendForm)
-	configureRouter(http.MethodPost, "/snippet/create_api", app.snippetCreateByAPI)
-
 	configureRouter(http.MethodGet, "/snippet/view/:id", app.snippetView)
 
 	// Auth
@@ -38,10 +32,20 @@ func (app *Application) routes() http.Handler {
 	configureRouter(http.MethodGet, "/auth/login", app.userLoginGet)
 	configureRouter(http.MethodPost, "/auth/login", app.userLoginPost)
 
-	configureRouter(http.MethodPost, "/auth/logout", app.userLogoutPost)
+	protectedWithAuth := withSessions.Append(app.requireAuthentication)
 
 	ch := alice.New(app.recoverPanic, app.logHandler, middleware.SecureHeaders)
 
+	configureRouter = func(method string, route string, handler http.HandlerFunc) {
+		router.Handler(method, route, protectedWithAuth.ThenFunc(handler))
+	}
+
+	configureRouter(http.MethodGet, "/snippet/create", app.snippetCreatePage)
+
+	configureRouter(http.MethodPost, "/snippet/create", app.snippetCreatePageSendForm)
+	configureRouter(http.MethodPost, "/snippet/create_api", app.snippetCreateByAPI)
+
+	configureRouter(http.MethodPost, "/auth/logout", app.userLogoutPost)
 	return ch.Then(router)
 }
 
