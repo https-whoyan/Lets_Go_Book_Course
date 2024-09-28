@@ -40,3 +40,9 @@ type UserSignupForm struct {
 	Email               string `form:"email"`
 	Password            string `form:"password"`
 }
+
+type UserLoginForm struct {
+	validator.Validator `form:"-"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+}

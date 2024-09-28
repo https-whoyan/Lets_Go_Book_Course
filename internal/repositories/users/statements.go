@@ -9,4 +9,12 @@ const (
 		    $1, $2, $3, NOW()
 		)
 	`
+	selectByEmail = `
+		SELECT 
+	` + allColumnsUsers + ` 
+		FROM users 
+		WHERE mail = $1
+	`
+	selectById = `SELECT ` +
+		allColumnsUsers + ` FROM users WHERE id = $1`
 )

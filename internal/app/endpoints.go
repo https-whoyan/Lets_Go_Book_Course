@@ -108,7 +108,6 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 // Auth
 
 func (app *Application) userSignupGet(w http.ResponseWriter, r *http.Request) {
-	//...
 	data := app.newTemplateData(r)
 	data.Form = template.UserSignupForm{}
 	app.render(w, http.StatusOK, "signup.tmpl", data)
@@ -134,17 +133,74 @@ func (app *Application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Create a new user...")
+	err = app.users.Insert(form.Name, form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, myErrors.ErrDuplicateEmail) {
+			form.AddFieldError("email", "Email address is already in use")
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
+	http.Redirect(w, r, "/auth/login", http.StatusSeeOther)
 }
 
 func (app *Application) userLoginGet(w http.ResponseWriter, r *http.Request) {
-
+	data := app.newTemplateData(r)
+	data.Form = template.UserLoginForm{}
+	app.render(w, http.StatusOK, "login.tmpl", data)
 }
 
 func (app *Application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	var form template.UserLoginForm
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
+	form.CheckField(validator.NonBlank(form.Email), "email", "not empty")
+	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "invalid email")
+	form.CheckField(validator.NonBlank(form.Password), "password", "not empty")
+
+	if !form.Valid() {
+		data := template.NewTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", data)
+		return
+	}
+	id, err := app.users.Authenticate(form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, myErrors.ErrInvalidCredentials) {
+			form.AddFieldError("email", "Email or password is incorrect")
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, http.StatusUnprocessableEntity, "login.tmpl", data)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	err = app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	app.sessionManager.Put(r.Context(), authKey, id)
+	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
 
 func (app *Application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
-
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	app.sessionManager.Remove(r.Context(), authKey)
+	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

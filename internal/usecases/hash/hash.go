@@ -3,7 +3,6 @@ package hash
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"hash"
 	"os"
 )
@@ -16,7 +15,6 @@ var (
 func init() {
 	hashSalt = os.Getenv("HASH_SALT")
 	hashAlgo = sha256.New()
-	fmt.Println(hashAlgo, hashSalt, " + ", hashSalt)
 }
 
 func GetHash(s string) (hashedString string) {
