@@ -25,6 +25,9 @@ func (app *Application) routes() http.Handler {
 	configureRouter(http.MethodGet, "/", app.home)
 	configureRouter(http.MethodGet, "/snippet/view/:id", app.snippetView)
 
+	// Ping
+	configureRouter(http.MethodGet, "/ping", app.ping)
+
 	// Auth
 
 	configureRouter(http.MethodGet, "/auth/signup", app.userSignupGet)

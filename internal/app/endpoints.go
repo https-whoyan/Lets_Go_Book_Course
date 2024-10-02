@@ -19,6 +19,10 @@ func (app *Application) snippetCreatePage(w http.ResponseWriter, r *http.Request
 	app.render(w, http.StatusOK, "create.tmpl", data)
 }
 
+func (app *Application) ping(w http.ResponseWriter, _ *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func (app *Application) snippetCreatePageSendForm(w http.ResponseWriter, r *http.Request) {
 	form := template.SnippetCreateForm{}
 	err := app.decodePostForm(r, &form)
